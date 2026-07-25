@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AnomalyDetectedEvent extends DomainEvent {
-    private String anomalyType;  // OVERVOLTAGE, UNDERCURRENT, FREQUENCY_DEVIATION
+    private String anomalyType;
     private String description;
     private Double detectedValue;
     private Double threshold;
-    private String severity;     // CRITICAL, WARNING, INFO
+    private String severity;
 
     @Override
     public String getEventType() {

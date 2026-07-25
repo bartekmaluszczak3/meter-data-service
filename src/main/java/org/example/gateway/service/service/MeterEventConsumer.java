@@ -20,7 +20,7 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 @Slf4j
-public class MeterDataService {
+public class MeterEventConsumer {
 
     private final MeterEventRepository eventRepository;
     private final AnomalyDetectionService anomalyDetectionService;
@@ -31,24 +31,17 @@ public class MeterDataService {
             "telemetry.ev",
             "telemetry.battery"
     }, groupId = "meter-data-service")
-    @Transactional
     public void processTelemetry(TelemetryPayload payload) {
         log.info("Processing telemetry for meter: {} ({})",
                 payload.getDeviceId(), payload.getDeviceType());
 
         try {
-            // Step 1: Create MeterReadingRecordedEvent
             MeterReadingRecordedEvent readingEvent = createReadingEvent(payload);
 
-            // Step 2: Append to Event Store
             eventRepository.save(readingEvent);
             log.debug("Event appended: {}", readingEvent.getEventId());
-
-            // Step 3: Detect anomalies
             List<AnomalyDetectedEvent> anomalies =
                     anomalyDetectionService.detectAnomalies(payload);
-
-            // Step 4: Append anomaly events
             for (AnomalyDetectedEvent anomaly : anomalies) {
                 eventRepository.save(anomaly);
                 log.warn("Anomaly detected for meter {}: {}",
@@ -77,11 +70,11 @@ public class MeterDataService {
     }
 
 
-    @Transactional(readOnly = true)
-    public List<MeterAggregate.MeterReading> getRecentReadings(String meterId, int count) throws DatabaseException {
-        MeterAggregate meter = getMeterState(meterId);
-        return meter.getLastReadings(count);
-    }
+//    @Transactional(readOnly = true)
+//    public List<MeterAggregate.MeterReading> getRecentReadings(String meterId, int count) throws DatabaseException {
+//        MeterAggregate meter = getMeterState(meterId);
+//        return meter.getLastReadings(count);
+//    }
 
     /**
      * Get anomalies detected for a meter in time window

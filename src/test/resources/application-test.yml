@@ -1,0 +1,17 @@
+spring:
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    consumer:
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: org.example.gateway.domain
+        spring.json.value.default.type: org.example.gateway.domain.TelemetryPayload
+logging:
+  level:
+    org.springframework.kafka: TRACE
+    org.springframework.kafka.listener: TRACE

@@ -8,6 +8,7 @@ import org.example.gateway.service.domain.event.*;
 import org.example.gateway.service.exception.DatabaseException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -21,12 +22,13 @@ public class MeterEventRepository {
     private final JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
 
+    @Transactional
     public void save(DomainEvent event) throws DatabaseException {
         String sql = """
-                INSERT INTO meter_events (event_id, meter_id, event_type, event_data, timestamp, version)
-                VALUES (?, ?, ?, ?::jsonb, ?, ?)
-                """;
-
+        INSERT INTO meter_events 
+        (event_id, meter_id, event_type, event_data, occurred_at, version)
+        VALUES (?, ?, ?, ?::jsonb, ?, ?)
+        """;
         try {
             String eventJson = objectMapper.writeValueAsString(event);
             jdbcTemplate.update(sql,
@@ -50,7 +52,7 @@ public class MeterEventRepository {
             SELECT event_data, event_type
             FROM meter_events
             WHERE meter_id = ?
-            ORDER BY timestamp ASC
+            ORDER BY occurred_at ASC
             """;
 
         try {
