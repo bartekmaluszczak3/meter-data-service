@@ -3,6 +3,7 @@ package org.example.gateway.service.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gateway.domain.TelemetryPayload;
+import org.example.gateway.service.config.AnomaliesRangeProperties;
 import org.example.gateway.service.domain.event.AnomalyDetectedEvent;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,8 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 public class AnomalyDetectionService {
+    private final AnomaliesRangeProperties anomaliesRangeProperties;
+
 
     public List<AnomalyDetectedEvent> detectAnomalies(TelemetryPayload payload) {
         List<AnomalyDetectedEvent> anomalies = new ArrayList<>();
@@ -35,9 +38,10 @@ public class AnomalyDetectionService {
 
     private List<AnomalyDetectedEvent> detectSmartMeterAnomalies(TelemetryPayload payload) {
         List<AnomalyDetectedEvent> anomalies = new ArrayList<>();
+        var properties = anomaliesRangeProperties.getSmartMeter();
 
-        if (payload.getReadings().getVoltage() < 198 ||
-                payload.getReadings().getVoltage() > 264) {
+        if (payload.getReadings().getVoltage() < properties.getVoltage().getMin() ||
+                payload.getReadings().getVoltage() > properties.getVoltage().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
                     "OVERVOLTAGE",
@@ -48,8 +52,8 @@ public class AnomalyDetectionService {
             ));
         }
 
-        if (payload.getReadings().getFrequency() < 49.5 ||
-                payload.getReadings().getFrequency() > 50.5) {
+        if (payload.getReadings().getFrequency() < properties.getFrequency().getMin() ||
+                payload.getReadings().getFrequency() > properties.getFrequency().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
                     "FREQUENCY_DEVIATION",
@@ -61,7 +65,7 @@ public class AnomalyDetectionService {
         }
 
         // Reactive power should be low
-        if (payload.getReadings().getReactivePower() > 5.0) {
+        if (payload.getReadings().getReactivePower() > properties.getReactivePower().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
                     "HIGH_REACTIVE_POWER",
@@ -76,10 +80,11 @@ public class AnomalyDetectionService {
     }
 
     private List<AnomalyDetectedEvent> detectSolarPanelAnomalies(TelemetryPayload payload) {
+        var properties = anomaliesRangeProperties.getSolarPanel();
         List<AnomalyDetectedEvent> anomalies = new ArrayList<>();
 
-        if (payload.getReadings().getVoltage() < 200 ||
-                payload.getReadings().getVoltage() > 260) {
+        if (payload.getReadings().getVoltage() < properties.getVoltage().getMin() ||
+                payload.getReadings().getVoltage() >  properties.getVoltage().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
                     "VOLTAGE_OUT_OF_RANGE",
@@ -95,9 +100,10 @@ public class AnomalyDetectionService {
 
     private List<AnomalyDetectedEvent> detectWindTurbineAnomalies(TelemetryPayload payload) {
         List<AnomalyDetectedEvent> anomalies = new ArrayList<>();
+        var properties = anomaliesRangeProperties.getWindTurbine();
 
-        if (payload.getReadings().getFrequency() < 49.0 ||
-                payload.getReadings().getFrequency() > 51.0) {
+        if (payload.getReadings().getFrequency() < properties.getFrequency().getMin() ||
+                payload.getReadings().getFrequency() >  properties.getFrequency().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
                     "FREQUENCY_DEVIATION",
@@ -113,8 +119,9 @@ public class AnomalyDetectionService {
 
     private List<AnomalyDetectedEvent> detectEVChargerAnomalies(TelemetryPayload payload) {
         List<AnomalyDetectedEvent> anomalies = new ArrayList<>();
+        var properties = anomaliesRangeProperties.getEvCharger();
 
-        if (payload.getReadings().getActivePower() > 11.5) {
+        if (payload.getReadings().getActivePower() > properties.getActivePower().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
                     "OVERCURRENT",
@@ -129,10 +136,12 @@ public class AnomalyDetectionService {
     }
 
     private List<AnomalyDetectedEvent> detectBatteryStorageAnomalies(TelemetryPayload payload) {
-        List<AnomalyDetectedEvent> anomalies = new ArrayList<>();
 
-        if (payload.getReadings().getFrequency() < 48.5 ||
-                payload.getReadings().getFrequency() > 51.5) {
+        List<AnomalyDetectedEvent> anomalies = new ArrayList<>();
+        var properties = anomaliesRangeProperties.getBattery();
+
+        if (payload.getReadings().getFrequency() < properties.getFrequency().getMin() ||
+                payload.getReadings().getFrequency() > properties.getFrequency().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
                     "FREQUENCY_INSTABILITY",

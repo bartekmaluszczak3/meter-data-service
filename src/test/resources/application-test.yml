@@ -11,7 +11,50 @@ spring:
       properties:
         spring.json.trusted.packages: org.example.gateway.domain
         spring.json.value.default.type: org.example.gateway.domain.TelemetryPayload
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+
+  h2:
+    console:
+      enabled: true
+
 logging:
   level:
     org.springframework.kafka: TRACE
     org.springframework.kafka.listener: TRACE
+
+service:
+  anomalies-range:
+    smart-meter:
+      voltage:
+        min: 198.0
+        max: 264.0
+      frequency:
+        min: 49.5
+        max: 50.5
+      reactive-power:
+        max: 5.0
+    solar-panel:
+      voltage:
+        min: 200.0
+        max: 260.0
+    ev-charger:
+       active-power:
+         max: 11.5
+    wind-turbine:
+       frequency:
+         min: 49.0
+         max: 51.0
+    battery:
+      frequency:
+       min: 48.5
+       max: 51.5
