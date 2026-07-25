@@ -8,7 +8,7 @@ import org.example.gateway.domain.value.DeviceType;
 import org.example.gateway.service.Application;
 import org.example.gateway.service.aggregate.MeterAggregate;
 import org.example.gateway.service.domain.repository.MeterEventRepository;
-import org.example.gateway.service.service.MeterEventConsumer;
+import org.example.gateway.service.service.MeterEventService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,7 +55,7 @@ public class MeterEventConsumerTest {
     private KafkaTemplate<String, TelemetryPayload> kafkaTemplate;
 
     @Autowired
-    private MeterEventConsumer meterEventConsumer;
+    private MeterEventService meterEventConsumer;
 
     @Autowired
     private MeterEventRepository eventRepository;

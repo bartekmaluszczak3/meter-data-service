@@ -1,6 +1,5 @@
 package org.example.gateway.service.domain.repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,6 @@ public class MeterEventRepository {
     private final JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
 
-    @Transactional
     public void save(DomainEvent event) throws DatabaseException {
         String sql = """
         INSERT INTO meter_events 
