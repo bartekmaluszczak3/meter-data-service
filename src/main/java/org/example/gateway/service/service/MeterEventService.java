@@ -4,7 +4,9 @@ package org.example.gateway.service.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gateway.service.aggregate.MeterAggregate;
+import org.example.gateway.service.domain.event.AnomalyDetectedEvent;
 import org.example.gateway.service.domain.event.DomainEvent;
+import org.example.gateway.service.domain.event.MeterReadingRecordedEvent;
 import org.example.gateway.service.domain.repository.MeterEventRepository;
 import org.example.gateway.service.exception.DatabaseException;
 import org.springframework.stereotype.Service;
@@ -31,13 +33,13 @@ public class MeterEventService {
     }
 
     @Transactional
-    public void save(DomainEvent readingRecordedEvent) throws DatabaseException {
+    public void save(MeterReadingRecordedEvent readingRecordedEvent) throws DatabaseException {
         eventRepository.save(readingRecordedEvent);
     }
-    @Transactional(readOnly = true)
-    public List<MeterAggregate.MeterReading> getRecentReadings(String meterId, int count) throws DatabaseException {
-        MeterAggregate meter = getMeterState(meterId);
-        return meter.getLastReadings(count);
+
+    @Transactional
+    public void save(AnomalyDetectedEvent anomalyDetectedEvent) throws DatabaseException {
+        eventRepository.save(anomalyDetectedEvent);
     }
 
     @Transactional(readOnly = true)
