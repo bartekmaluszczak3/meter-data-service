@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.gateway.domain.TelemetryPayload;
 import org.example.gateway.service.config.AnomaliesRangeProperties;
 import org.example.gateway.service.domain.event.AnomalyDetectedEvent;
+import org.example.gateway.service.domain.event.AnomalyType;
+import org.example.gateway.service.domain.event.Severity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -44,11 +46,11 @@ public class AnomalyDetectionService {
                 payload.getReadings().getVoltage() > properties.getVoltage().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
-                    "OVERVOLTAGE",
+                    AnomalyType.OVERVOLTAGE,
                     "Voltage out of range: " + payload.getReadings().getVoltage() + "V",
                     payload.getReadings().getVoltage(),
                     230.0,
-                    "WARNING"
+                    Severity.WARNING
             ));
         }
 
@@ -56,11 +58,11 @@ public class AnomalyDetectionService {
                 payload.getReadings().getFrequency() > properties.getFrequency().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
-                    "FREQUENCY_DEVIATION",
+                    AnomalyType.FREQUENCY_DEVIATION,
                     "Frequency out of range: " + payload.getReadings().getFrequency() + "Hz",
                     payload.getReadings().getFrequency(),
                     50.0,
-                    "WARNING"
+                    Severity.WARNING
             ));
         }
 
@@ -68,11 +70,11 @@ public class AnomalyDetectionService {
         if (payload.getReadings().getReactivePower() > properties.getReactivePower().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
-                    "HIGH_REACTIVE_POWER",
+                    AnomalyType.HIGH_REACTIVE_POWER,
                     "Reactive power too high: " + payload.getReadings().getReactivePower(),
                     payload.getReadings().getReactivePower(),
                     5.0,
-                    "INFO"
+                    Severity.INFO
             ));
         }
 
@@ -87,11 +89,11 @@ public class AnomalyDetectionService {
                 payload.getReadings().getVoltage() >  properties.getVoltage().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
-                    "VOLTAGE_OUT_OF_RANGE",
+                    AnomalyType.VOLTAGE_OUT_OF_RANGE,
                     "Solar panel voltage: " + payload.getReadings().getVoltage(),
                     payload.getReadings().getVoltage(),
                     230.0,
-                    "WARNING"
+                    Severity.WARNING
             ));
         }
 
@@ -106,11 +108,11 @@ public class AnomalyDetectionService {
                 payload.getReadings().getFrequency() >  properties.getFrequency().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
-                    "FREQUENCY_DEVIATION",
+                    AnomalyType.FREQUENCY_DEVIATION,
                     "Wind turbine frequency: " + payload.getReadings().getFrequency(),
                     payload.getReadings().getFrequency(),
                     50.0,
-                    "WARNING"
+                    Severity.WARNING
             ));
         }
 
@@ -124,11 +126,11 @@ public class AnomalyDetectionService {
         if (payload.getReadings().getActivePower() > properties.getActivePower().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
-                    "OVERCURRENT",
+                    AnomalyType.OVERCURRENT,
                     "EV Charger power exceeds limit: " + payload.getReadings().getActivePower() + "kW",
                     payload.getReadings().getActivePower(),
                     11.5,
-                    "CRITICAL"
+                    Severity.CRITICAL
             ));
         }
 
@@ -144,11 +146,11 @@ public class AnomalyDetectionService {
                 payload.getReadings().getFrequency() > properties.getFrequency().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,
-                    "FREQUENCY_INSTABILITY",
+                    AnomalyType.FREQUENCY_INSTABILITY,
                     "Battery storage frequency critical: " + payload.getReadings().getFrequency(),
                     payload.getReadings().getFrequency(),
                     50.0,
-                    "CRITICAL"
+                    Severity.CRITICAL
             ));
         }
 
@@ -157,11 +159,11 @@ public class AnomalyDetectionService {
 
     private AnomalyDetectedEvent createAnomalyEvent(
             TelemetryPayload payload,
-            String anomalyType,
+            AnomalyType anomalyType,
             String description,
             Double detectedValue,
             Double threshold,
-            String severity) {
+            Severity severity) {
 
         AnomalyDetectedEvent event = new AnomalyDetectedEvent();
         event.setMeterId(payload.getDeviceId());

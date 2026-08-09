@@ -2,9 +2,9 @@ package org.example.gateway.service.service;
 
 import org.example.gateway.domain.Readings;
 import org.example.gateway.domain.TelemetryPayload;
-import org.example.gateway.domain.value.DeviceType;
 import org.example.gateway.service.Application;
 import org.example.gateway.service.domain.event.AnomalyDetectedEvent;
+import org.example.gateway.service.domain.event.AnomalyType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +40,9 @@ public class AnomalyDetectionServiceTest {
 
         // then
         Assertions.assertEquals(3, anomalies.size());
-        assertAnomalyType(anomalies, "OVERVOLTAGE");
-        assertAnomalyType(anomalies, "FREQUENCY_DEVIATION");
-        assertAnomalyType(anomalies, "HIGH_REACTIVE_POWER");
+        assertAnomalyType(anomalies, AnomalyType.OVERVOLTAGE);
+        assertAnomalyType(anomalies, AnomalyType.FREQUENCY_DEVIATION);
+        assertAnomalyType(anomalies, AnomalyType.HIGH_REACTIVE_POWER);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class AnomalyDetectionServiceTest {
 
         // then
         Assertions.assertEquals(1, anomalies.size());
-        assertAnomalyType(anomalies, "VOLTAGE_OUT_OF_RANGE");
+        assertAnomalyType(anomalies, AnomalyType.VOLTAGE_OUT_OF_RANGE);
     }
 
     @Test
@@ -78,7 +78,7 @@ public class AnomalyDetectionServiceTest {
 
         // then
         Assertions.assertEquals(1, anomalies.size());
-        assertAnomalyType(anomalies, "FREQUENCY_DEVIATION");
+        assertAnomalyType(anomalies, AnomalyType.FREQUENCY_DEVIATION);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class AnomalyDetectionServiceTest {
 
         // then
         Assertions.assertEquals(1, anomalies.size());
-        assertAnomalyType(anomalies, "OVERCURRENT");
+        assertAnomalyType(anomalies, AnomalyType.OVERCURRENT);
     }
     @Test
     void shouldDetectBatteryAnomaly() {
@@ -113,10 +113,10 @@ public class AnomalyDetectionServiceTest {
 
         // then
         Assertions.assertEquals(1, anomalies.size());
-        assertAnomalyType(anomalies, "FREQUENCY_INSTABILITY");
+        assertAnomalyType(anomalies, AnomalyType.FREQUENCY_INSTABILITY);
     }
 
-    private void assertAnomalyType(List<AnomalyDetectedEvent> anomalies, String type) {
+    private void assertAnomalyType(List<AnomalyDetectedEvent> anomalies, AnomalyType type) {
         Optional<AnomalyDetectedEvent> anomalyDetected = anomalies.stream().filter(e -> e.getAnomalyType().equals(type)).findAny();
         Assertions.assertTrue(anomalyDetected.isPresent());
     }

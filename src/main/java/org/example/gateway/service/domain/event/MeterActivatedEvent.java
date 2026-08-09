@@ -11,7 +11,7 @@ public class MeterActivatedEvent extends DomainEvent {
     private String gridZone;
 
     @Override
-    public String getEventType() {
-        return "METER_ACTIVATED";
+    public EventType getEventType() {
+        return EventType.METER_ACTIVATED;
     }
 }

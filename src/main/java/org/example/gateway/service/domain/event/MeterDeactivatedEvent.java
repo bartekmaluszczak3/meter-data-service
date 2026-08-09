@@ -9,7 +9,7 @@ public class MeterDeactivatedEvent extends DomainEvent {
     private String reason;
 
     @Override
-    public String getEventType() {
-        return "METER_DEACTIVATED";
+    public EventType getEventType() {
+        return EventType.METER_DEACTIVATED;
     }
 }

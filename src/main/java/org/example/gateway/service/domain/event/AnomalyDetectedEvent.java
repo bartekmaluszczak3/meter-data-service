@@ -8,14 +8,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AnomalyDetectedEvent extends DomainEvent {
-    private String anomalyType;
+    private AnomalyType anomalyType;
     private String description;
     private Double detectedValue;
     private Double threshold;
-    private String severity;
+    private Severity severity;
 
     @Override
-    public String getEventType() {
-        return "ANOMALY_DETECTED";
+    public EventType getEventType() {
+        return EventType.ANOMALY_DETECTED;
     }
 }

@@ -20,7 +20,7 @@ public class MeterReadingRecordedEvent extends DomainEvent {
     private Instant recordedAt;
 
     @Override
-    public String getEventType() {
-        return "METER_READING_RECORDED";
+    public EventType getEventType() {
+        return EventType.METER_READING_RECORDED;
     }
 }

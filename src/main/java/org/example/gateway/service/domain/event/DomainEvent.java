@@ -17,6 +17,6 @@ public abstract class DomainEvent implements Serializable {
     private Instant occurredAt = Instant.now();
     private int eventVersion = 1;
 
-    public abstract String getEventType();
+    public abstract EventType getEventType();
 }
 

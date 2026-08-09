@@ -1,6 +1,5 @@
 package org.example.gateway.service.domain.repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +24,7 @@ public class MeterEventRepository {
     @Transactional
     public void save(DomainEvent event) throws DatabaseException {
         String sql = """
-        INSERT INTO meter_events 
+        INSERT INTO meter_events
         (event_id, meter_id, event_type, event_data, occurred_at, version)
         VALUES (?, ?, ?, ?::jsonb, ?, ?)
         """;
@@ -34,7 +33,7 @@ public class MeterEventRepository {
             jdbcTemplate.update(sql,
                     event.getEventId(),
                     event.getMeterId(),
-                    event.getEventType(),
+                    event.getEventType().name(),
                     eventJson,
                     Timestamp.from(event.getOccurredAt()),
                     event.getEventVersion()
@@ -60,7 +59,7 @@ public class MeterEventRepository {
                 String eventJson = rs.getString("event_data");
                 String eventType = rs.getString("event_type");
 
-                return deserializeEvent(eventJson, eventType);
+                return deserializeEvent(eventJson, EventType.valueOf(eventType));
             });
         } catch (Exception e) {
             log.error("Failed to retrieve event stream for meter: {}", meterId, e);
@@ -83,7 +82,7 @@ public class MeterEventRepository {
                         String eventJson = rs.getString("event_data");
                         String eventType = rs.getString("event_type");
 
-                        return deserializeEvent(eventJson, eventType);
+                        return deserializeEvent(eventJson, EventType.valueOf(eventType));
                     });
         } catch (Exception e) {
             log.error("Failed to retrieve event stream for meter: {}", meterId, e);
@@ -91,16 +90,16 @@ public class MeterEventRepository {
         }
     }
 
-    private DomainEvent deserializeEvent(String json, String eventType) {
+    private DomainEvent deserializeEvent(String json, EventType eventType) {
         try {
             return switch (eventType) {
-                case "METER_READING_RECORDED" ->
+                case METER_READING_RECORDED ->
                         objectMapper.readValue(json, MeterReadingRecordedEvent.class);
-                case "ANOMALY_DETECTED" ->
+                case ANOMALY_DETECTED ->
                         objectMapper.readValue(json, AnomalyDetectedEvent.class);
-                case "METER_ACTIVATED" ->
+                case METER_ACTIVATED ->
                         objectMapper.readValue(json, MeterActivatedEvent.class);
-                case "METER_DEACTIVATED" ->
+                case METER_DEACTIVATED ->
                         objectMapper.readValue(json, MeterDeactivatedEvent.class);
                 default -> throw new RuntimeException("Unknown event type: " + eventType);
             };

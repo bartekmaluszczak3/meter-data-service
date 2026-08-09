@@ -120,11 +120,11 @@ public class MeterAggregate {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class DetectedAnomaly {
-        private String type;           // OVERVOLTAGE, UNDERCURRENT, etc
+        private AnomalyType type;
         private String description;
         private Double detectedValue;
         private Double threshold;
-        private String severity;       // CRITICAL, WARNING, INFO
+        private Severity severity;
         private Instant detectedAt;
     }
 }
