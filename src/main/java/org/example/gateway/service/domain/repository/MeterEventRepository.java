@@ -66,29 +66,6 @@ public class MeterEventRepository {
             throw new DatabaseException("Failed to retrieve event");
         }
     }
-    public List<DomainEvent> getEventStream(String meterId, Instant from, Instant to) throws DatabaseException {
-        String sql = """
-            SELECT event_data, event_type
-            FROM meter_events
-            WHERE meter_id = ?
-            AND timestamp >= ? AND timestamp <= ?
-            ORDER BY timestamp ASC
-            """;
-
-        try {
-            return jdbcTemplate.query(sql,
-                    new Object[]{meterId, Timestamp.from(from), Timestamp.from(to)},
-                    (rs, rowNum) -> {
-                        String eventJson = rs.getString("event_data");
-                        String eventType = rs.getString("event_type");
-
-                        return deserializeEvent(eventJson, EventType.valueOf(eventType));
-                    });
-        } catch (Exception e) {
-            log.error("Failed to retrieve event stream for meter: {}", meterId, e);
-            throw new DatabaseException("Failed to retrieve event");
-        }
-    }
 
     private DomainEvent deserializeEvent(String json, EventType eventType) {
         try {

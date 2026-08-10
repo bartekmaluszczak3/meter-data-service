@@ -41,18 +41,4 @@ public class MeterEventService {
     public void save(AnomalyDetectedEvent anomalyDetectedEvent) throws DatabaseException {
         eventRepository.save(anomalyDetectedEvent);
     }
-
-    @Transactional(readOnly = true)
-    public List<MeterAggregate.DetectedAnomaly> getAnomalies(
-            String meterId, Instant from, Instant to) throws DatabaseException {
-
-        List<DomainEvent> events = eventRepository.getEventStream(meterId);
-        MeterAggregate meter = new MeterAggregate();
-        meter.rebuildFromEvents(events);
-
-        return meter.getAnomalies().stream()
-                .filter(a -> a.getDetectedAt().isAfter(from) &&
-                        a.getDetectedAt().isBefore(to))
-                .toList();
-    }
 }
