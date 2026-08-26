@@ -86,6 +86,7 @@ public abstract class IntegrationBaseTest {
     @Autowired
     protected MeterEventRepository eventRepository;
 
+
     protected Integer count() {
         return jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM meter_events",

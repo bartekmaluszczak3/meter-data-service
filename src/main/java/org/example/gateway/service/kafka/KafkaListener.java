@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 public class KafkaListener {
-    private final MeterEventService meterEventConsumer;
+    private final MeterEventService meterEventService;
     private final AnomalyDetectionService anomalyDetectionService;
 
     @org.springframework.kafka.annotation.KafkaListener(topics = {
@@ -32,11 +32,13 @@ public class KafkaListener {
                 payload.getDeviceId(), payload.getDeviceType());
         try {
             MeterReadingRecordedEvent readingEvent = createReadingEvent(payload);
-            meterEventConsumer.save(readingEvent);
+            meterEventService.save(readingEvent);
+
             List<AnomalyDetectedEvent> anomalies =
                     anomalyDetectionService.detectAnomalies(payload);
+
             for (AnomalyDetectedEvent anomaly : anomalies) {
-                meterEventConsumer.save(anomaly);
+                meterEventService.save(anomaly, readingEvent.getEventId(), readingEvent.getRecordedAt());
                 log.warn("Anomaly detected for meter {}: {}",
                         payload.getDeviceId(), anomaly.getAnomalyType());
             }

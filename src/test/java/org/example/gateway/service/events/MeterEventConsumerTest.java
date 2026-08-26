@@ -4,13 +4,18 @@ import lombok.SneakyThrows;
 import org.example.gateway.domain.Readings;
 import org.example.gateway.domain.TelemetryPayload;
 import org.example.gateway.domain.value.DeviceType;
-import org.example.gateway.service.aggregate.MeterAggregate;
+import org.example.gateway.service.agragate.MeterAggregator;
+import org.example.gateway.service.domain.internal.Anomaly;
+import org.example.gateway.service.domain.internal.MeterEvent;
 import org.example.gateway.service.utils.IntegrationBaseTest;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,13 +24,22 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 public class MeterEventConsumerTest extends IntegrationBaseTest {
 
+    @Autowired
+    MeterAggregator meterAggregator;
+
+    @BeforeEach
+    void beforeEach(){
+        clear();
+    }
+
+
     @SneakyThrows
     @Test
     void shouldProperlyReceiveEventAndSaveToDatabase(){
         // given
         String meterId = "meter-001";
         String topic = "telemetry.meters";
-        TelemetryPayload payload = buildPayload("meter-001", DeviceType.SMART_METER);
+        TelemetryPayload payload = buildPayload("meter-001", SMART_METER);
 
         // when
         kafkaTemplate.send(topic, meterId, payload);
@@ -35,8 +49,8 @@ public class MeterEventConsumerTest extends IntegrationBaseTest {
                 .atMost(5, TimeUnit.SECONDS)
                 .pollInterval(100, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> {
-                    MeterAggregate meterState = meterEventService.getMeterState(meterId);
-                    assertThat(meterState.getMeterId()).isEqualTo(meterId);
+                    var meterEvent = meterAggregator.getMeterEvents();
+                    assertThat(meterEvent.size()).isEqualTo(1);
                 });
     }
 
@@ -54,12 +68,13 @@ public class MeterEventConsumerTest extends IntegrationBaseTest {
                 .atMost(5, TimeUnit.SECONDS)
                 .pollInterval(100, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> {
+                    List<MeterEvent> events = meterAggregator.getMeterEvents();
+                    Assertions.assertEquals(events.size(), 4);
                     List<String> metersId = List.of("solar-001","wind-001", "ev-001", "battery-001" );
                     for(String meter: metersId) {
-                        MeterAggregate meterState = meterEventService.getMeterState(meter);
-                        assertThat(meterState.getMeterId()).isEqualTo(meter);
+                        Optional<String> any = events.stream().map(MeterEvent::getMeterId).filter(e -> e.equals(meter)).findAny();
+                        Assertions.assertTrue(any.isPresent());
                     }
-
                 });
     }
 
@@ -82,8 +97,7 @@ public class MeterEventConsumerTest extends IntegrationBaseTest {
                 .atMost(5, TimeUnit.SECONDS)
                 .pollInterval(100, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> {
-                    MeterAggregate meterState = meterEventService.getMeterState(meterId);
-                    var anomalies = meterState.getAnomalies();
+                    List<Anomaly> anomalies = meterAggregator.getAnomalies();
                     Assertions.assertEquals(3, anomalies.size());
                 });
     }

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @AllArgsConstructor
@@ -21,12 +22,11 @@ public class MeterEventRepository {
     private final JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
 
-    @Transactional
     public void save(DomainEvent event) throws DatabaseException {
         String sql = """
-        INSERT INTO meter_events
-        (event_id, meter_id, event_type, event_data, occurred_at, version)
-        VALUES (?, ?, ?, ?::jsonb, ?, ?)
+            INSERT INTO meter_events
+            (event_id, meter_id, event_type, event_data, occurred_at, version)
+            VALUES (?, ?, ?, ?::jsonb, ?, ?)
         """;
         try {
             String eventJson = objectMapper.writeValueAsString(event);
@@ -46,43 +46,47 @@ public class MeterEventRepository {
         }
     }
 
-    public List<DomainEvent> getEventStream(String meterId) throws DatabaseException {
+    public void save(AnomalyDetectedEvent anomalyDetectedEvent, String eventId, Instant eventOccurredAt)  throws DatabaseException{
         String sql = """
-            SELECT event_data, event_type
-            FROM meter_events
-            WHERE meter_id = ?
-            ORDER BY occurred_at ASC
-            """;
+            INSERT INTO meter_anomalies
+            (event_id, event_occurred_at, meter_id, anomaly_type, description,
+             detected_value, threshold, severity, detected_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
 
-        try {
-            return jdbcTemplate.query(sql, new Object[]{meterId}, (rs, rowNum) -> {
-                String eventJson = rs.getString("event_data");
-                String eventType = rs.getString("event_type");
-
-                return deserializeEvent(eventJson, EventType.valueOf(eventType));
-            });
+        try{
+            jdbcTemplate.update(sql,
+                    eventId,
+                    eventOccurredAt,
+                    anomalyDetectedEvent.getMeterId(),
+                    anomalyDetectedEvent.getAnomalyType().name(),
+                    anomalyDetectedEvent.getDescription(),
+                    anomalyDetectedEvent.getDetectedValue(),
+                    anomalyDetectedEvent.getThreshold(),
+                    anomalyDetectedEvent.getSeverity().name(),
+                    Timestamp.from(anomalyDetectedEvent.getOccurredAt())
+            );
+            log.debug("Anomaly appended: {} ", anomalyDetectedEvent.getEventId());
         } catch (Exception e) {
-            log.error("Failed to retrieve event stream for meter: {}", meterId, e);
-            throw new DatabaseException("Failed to retrieve event");
+            log.error("Failed to save Anomaly");
+            throw new DatabaseException("Failed to save Anomaly");
         }
     }
 
-    private DomainEvent deserializeEvent(String json, EventType eventType) {
-        try {
-            return switch (eventType) {
-                case METER_READING_RECORDED ->
-                        objectMapper.readValue(json, MeterReadingRecordedEvent.class);
-                case ANOMALY_DETECTED ->
-                        objectMapper.readValue(json, AnomalyDetectedEvent.class);
-                case METER_ACTIVATED ->
-                        objectMapper.readValue(json, MeterActivatedEvent.class);
-                case METER_DEACTIVATED ->
-                        objectMapper.readValue(json, MeterDeactivatedEvent.class);
-                default -> throw new RuntimeException("Unknown event type: " + eventType);
-            };
-        } catch (Exception e) {
-            log.error("Failed to deserialize event: {}", eventType, e);
-            throw new RuntimeException("Event deserialization error", e);
-        }
+    public List<Map<String, Object>> getMeterEvents() {
+    String sql = """
+        SELECT *
+        FROM meter_events
+        """;
+        return jdbcTemplate.queryForList(sql);
+    }
+
+
+    public List<Map<String, Object>> getAnomalies() {
+        String sql = """
+        SELECT *
+        FROM meter_events
+        """;
+        return jdbcTemplate.queryForList(sql);
     }
 }
