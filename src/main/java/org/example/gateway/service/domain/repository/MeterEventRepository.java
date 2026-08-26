@@ -57,7 +57,7 @@ public class MeterEventRepository {
         try{
             jdbcTemplate.update(sql,
                     eventId,
-                    eventOccurredAt,
+                    Timestamp.from(eventOccurredAt),
                     anomalyDetectedEvent.getMeterId(),
                     anomalyDetectedEvent.getAnomalyType().name(),
                     anomalyDetectedEvent.getDescription(),
@@ -69,6 +69,7 @@ public class MeterEventRepository {
             log.debug("Anomaly appended: {} ", anomalyDetectedEvent.getEventId());
         } catch (Exception e) {
             log.error("Failed to save Anomaly");
+            e.printStackTrace();
             throw new DatabaseException("Failed to save Anomaly");
         }
     }
@@ -85,7 +86,7 @@ public class MeterEventRepository {
     public List<Map<String, Object>> getAnomalies() {
         String sql = """
         SELECT *
-        FROM meter_events
+        FROM meter_anomalies
         """;
         return jdbcTemplate.queryForList(sql);
     }

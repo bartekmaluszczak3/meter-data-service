@@ -3,6 +3,8 @@ package org.example.gateway.service.domain.internal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.example.gateway.service.domain.event.AnomalyType;
+import org.example.gateway.service.domain.event.Severity;
 
 @AllArgsConstructor
 @Builder
@@ -12,11 +14,11 @@ public class Anomaly {
         private String meterId;
         private String eventId;
         private String eventOccurredAt;
-        private String anomalyType;
+        private AnomalyType anomalyType;
         private String description;
-        private String detectedValue;
-        private String threshold;
-        private String severity;
+        private Double detectedValue;
+        private Double threshold;
+        private Severity severity;
         private String detectedAt;
         private String createdAt;
 

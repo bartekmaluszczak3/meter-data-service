@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gateway.service.domain.event.AnomalyType;
+import org.example.gateway.service.domain.event.Severity;
 import org.example.gateway.service.domain.internal.Anomaly;
 import org.example.gateway.service.domain.internal.MeterEvent;
 import org.example.gateway.service.domain.repository.MeterEventRepository;
@@ -60,11 +62,11 @@ public class MeterAggregator {
                     .meterId(String.valueOf(databaseEntry.get("meter_id")))
                     .eventId(String.valueOf(databaseEntry.get("event_id")))
                     .eventOccurredAt(String.valueOf(databaseEntry.get("event_occurred_at")))
-                    .anomalyType(String.valueOf(databaseEntry.get("anomaly_type")))
+                    .anomalyType(AnomalyType.valueOf(String.valueOf(databaseEntry.get("anomaly_type"))))
                     .description(String.valueOf(databaseEntry.get("description")))
-                    .detectedValue(String.valueOf(databaseEntry.get("detected_value")))
-                    .threshold(String.valueOf(databaseEntry.get("threshold")))
-                    .severity(String.valueOf(databaseEntry.get("severity")))
+                    .detectedValue(Double.parseDouble(String.valueOf(databaseEntry.get("detected_value"))))
+                    .threshold(Double.parseDouble(String.valueOf(databaseEntry.get("threshold"))))
+                    .severity(Severity.valueOf(String.valueOf(databaseEntry.get("severity"))))
                     .detectedAt(String.valueOf(databaseEntry.get("detected_at")))
                     .createdAt(String.valueOf(databaseEntry.get("created_at")))
                     .build();
