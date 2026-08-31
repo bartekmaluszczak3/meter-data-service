@@ -87,21 +87,49 @@ public abstract class IntegrationBaseTest {
     protected MeterEventRepository eventRepository;
 
 
-    protected Integer count() {
+    protected Integer countEvent() {
         return jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM meter_events",
                 Integer.class
         );
     }
 
-    protected List<Map<String, Object>> getAllRows() {
+    protected Integer countProjection() {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM meter_readings_materialized",
+                Integer.class
+        );
+    }
+
+    protected Integer countAnomalies() {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM meter_anomalies;",
+                Integer.class
+        );
+    }
+
+    protected List<Map<String, Object>> getAllAnomalyRows() {
+        return jdbcTemplate.queryForList(
+                "SELECT * FROM meter_anomalies"
+        );
+    }
+
+    protected List<Map<String, Object>> getAllEventRows() {
         return jdbcTemplate.queryForList(
                 "SELECT * FROM meter_events"
         );
     }
 
+    protected List<Map<String, Object>> getAllProjection() {
+        return jdbcTemplate.queryForList(
+                "SELECT * FROM meter_readings_materialized"
+        );
+    }
+
     protected void clear() {
         jdbcTemplate.update("DELETE FROM meter_events");
+        jdbcTemplate.update("DELETE FROM meter_anomalies");
+        jdbcTemplate.update("DELETE FROM meter_readings_materialized");
     }
 
     protected TelemetryPayload buildPayload(

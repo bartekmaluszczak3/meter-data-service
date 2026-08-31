@@ -8,9 +8,6 @@ import org.example.gateway.service.domain.event.MeterReadingRecordedEvent;
 import org.example.gateway.service.domain.repository.MeterEventRepository;
 import org.example.gateway.service.exception.DatabaseException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
 
 @Service
 @AllArgsConstructor
@@ -19,13 +16,17 @@ public class MeterEventService {
 
     private final MeterEventRepository eventRepository;
 
-    @Transactional
     public void save(MeterReadingRecordedEvent readingRecordedEvent) throws DatabaseException {
+        log.debug("Saving reading event {}", readingRecordedEvent.getEventId());
         eventRepository.save(readingRecordedEvent);
+        log.debug("Reading event saved {}", readingRecordedEvent.getEventId());
+
     }
 
-    @Transactional
-    public void save(AnomalyDetectedEvent anomalyDetectedEvent, String eventId, Instant eventOccurredAt) throws DatabaseException {
-        eventRepository.save(anomalyDetectedEvent, eventId, eventOccurredAt);
+    public void save(AnomalyDetectedEvent anomalyDetectedEvent) throws DatabaseException {
+        log.debug("Saving anomaly {}", anomalyDetectedEvent.getAnomalyType().name());
+        eventRepository.save(anomalyDetectedEvent);
+        log.debug("Anomaly saved{}", anomalyDetectedEvent.getAnomalyType().name());
+
     }
 }
