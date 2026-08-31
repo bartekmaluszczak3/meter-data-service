@@ -1,6 +1,6 @@
 
 CREATE TABLE IF NOT EXISTS meter_events (
-    event_id UUID NOT NULL,
+    event_id VARCHAR(36) NOT NULL,
     meter_id VARCHAR(100) NOT NULL,
     event_type VARCHAR(50) NOT NULL,
     event_data JSONB NOT NULL,
@@ -81,7 +81,7 @@ COMMENT ON TABLE meter_readings_materialized IS 'CQRS Read Model - Denormalized 
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS meter_anomalies (
-    anomaly_id UUID NOT NULL,
+    anomaly_id VARCHAR(36) NOT NULL,
     detected_at TIMESTAMPTZ NOT NULL,
     meter_id VARCHAR(100) NOT NULL,
     anomaly_type VARCHAR(100) NOT NULL,

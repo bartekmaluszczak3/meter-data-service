@@ -87,14 +87,27 @@ public abstract class IntegrationBaseTest {
     protected MeterEventRepository eventRepository;
 
 
-    protected Integer count() {
+    protected Integer countEvent() {
         return jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM meter_events",
                 Integer.class
         );
     }
 
-    protected List<Map<String, Object>> getAllRows() {
+    protected Integer countAnomalies() {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM meter_anomalies;",
+                Integer.class
+        );
+    }
+
+    protected List<Map<String, Object>> getAllAnomalyRows() {
+        return jdbcTemplate.queryForList(
+                "SELECT * FROM meter_anomalies"
+        );
+    }
+
+    protected List<Map<String, Object>> getAllEventRows() {
         return jdbcTemplate.queryForList(
                 "SELECT * FROM meter_events"
         );

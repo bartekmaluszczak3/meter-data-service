@@ -7,10 +7,13 @@ import org.example.gateway.service.domain.event.AnomalyDetectedEvent;
 import org.example.gateway.service.domain.event.MeterReadingRecordedEvent;
 import org.example.gateway.service.service.AnomalyDetectionService;
 import org.example.gateway.service.service.MeterEventService;
+import org.example.gateway.service.service.projection.ProjectionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -18,6 +21,7 @@ import java.util.List;
 public class KafkaListener {
     private final MeterEventService meterEventService;
     private final AnomalyDetectionService anomalyDetectionService;
+    private final ProjectionService projectionService;
 
     @org.springframework.kafka.annotation.KafkaListener(topics = {
             "telemetry.meters",
@@ -26,19 +30,20 @@ public class KafkaListener {
             "telemetry.ev",
             "telemetry.battery"
     }, groupId = "meter-data-service")
-
+    @Transactional
     public void processTelemetry(TelemetryPayload payload) {
         log.info("Processing telemetry for meter: {} ({})",
                 payload.getDeviceId(), payload.getDeviceType());
         try {
             MeterReadingRecordedEvent readingEvent = createReadingEvent(payload);
             meterEventService.save(readingEvent);
+            projectionService.save(readingEvent);
 
             List<AnomalyDetectedEvent> anomalies =
                     anomalyDetectionService.detectAnomalies(payload);
 
             for (AnomalyDetectedEvent anomaly : anomalies) {
-                meterEventService.save(anomaly, readingEvent.getEventId(), readingEvent.getRecordedAt());
+                meterEventService.save(anomaly);
                 log.warn("Anomaly detected for meter {}: {}",
                         payload.getDeviceId(), anomaly.getAnomalyType());
             }
@@ -51,6 +56,7 @@ public class KafkaListener {
 
     private MeterReadingRecordedEvent createReadingEvent(TelemetryPayload payload) {
         MeterReadingRecordedEvent event = new MeterReadingRecordedEvent();
+        event.setEventId(UUID.randomUUID().toString());
         event.setMeterId(payload.getDeviceId());
         event.setDeviceType(payload.getDeviceType().name());
         event.setGridZone(payload.getGridZone());

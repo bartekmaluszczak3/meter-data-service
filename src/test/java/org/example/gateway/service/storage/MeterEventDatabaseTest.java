@@ -39,11 +39,11 @@ public class MeterEventDatabaseTest extends IntegrationBaseTest {
                 .atMost(5, TimeUnit.SECONDS)
                 .pollInterval(100, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> {
-                    Integer count = count();
+                    Integer count = countEvent();
                     assertThat(count).isEqualTo(1);
                 });
 
-        var event = getAllRows().get(0);
+        var event = getAllEventRows().get(0);
         String eventId = (String) event.get("meter_id");
         Assertions.assertEquals("meter-001", eventId);
         String eventType = (String) event.get("event_type");
@@ -54,7 +54,6 @@ public class MeterEventDatabaseTest extends IntegrationBaseTest {
         Assertions.assertEquals(230.1, eventData.get("voltage").asDouble());
         Assertions.assertEquals(50.0, eventData.get("frequency").asDouble());
         Assertions.assertEquals("SMART_METER", eventData.get("deviceType").asText());
-
     }
 
     @SneakyThrows
@@ -76,23 +75,13 @@ public class MeterEventDatabaseTest extends IntegrationBaseTest {
                 .atMost(5, TimeUnit.SECONDS)
                 .pollInterval(100, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> {
-                    Integer count = count();
-                    assertThat(count).isEqualTo(2);
+                    Integer count = countAnomalies();
+                    assertThat(count).isEqualTo(1);
                 });
 
-        var events = getAllRows();
-        var optionalAnomalyEvent = events.stream().filter(e-> {
-            String eventType = (String) e.get("event_type");
-            return eventType.equals("ANOMALY_DETECTED");
-        }).findFirst();
-        Assertions.assertTrue(optionalAnomalyEvent.isPresent());
-        var anomalyEvent = optionalAnomalyEvent.get();
-        String eventId = (String) anomalyEvent.get("meter_id");
+        var anomaly = getAllAnomalyRows().get(0);
+        String eventId = (String) anomaly.get("meter_id");
         Assertions.assertEquals("solar-001", eventId);
-        JsonNode eventData = objectMapper.readTree(
-                ((PGobject) anomalyEvent.get("event_data")).getValue());
-
-        Assertions.assertEquals("VOLTAGE_OUT_OF_RANGE", eventData.get("anomalyType").asText());
-
+        Assertions.assertEquals("VOLTAGE_OUT_OF_RANGE", anomaly.get("anomaly_type").toString());
     }
 }
