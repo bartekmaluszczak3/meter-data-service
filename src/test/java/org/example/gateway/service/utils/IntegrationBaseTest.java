@@ -94,6 +94,13 @@ public abstract class IntegrationBaseTest {
         );
     }
 
+    protected Integer countProjection() {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM meter_readings_materialized",
+                Integer.class
+        );
+    }
+
     protected Integer countAnomalies() {
         return jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM meter_anomalies;",
@@ -113,8 +120,16 @@ public abstract class IntegrationBaseTest {
         );
     }
 
+    protected List<Map<String, Object>> getAllProjection() {
+        return jdbcTemplate.queryForList(
+                "SELECT * FROM meter_readings_materialized"
+        );
+    }
+
     protected void clear() {
         jdbcTemplate.update("DELETE FROM meter_events");
+        jdbcTemplate.update("DELETE FROM meter_anomalies");
+        jdbcTemplate.update("DELETE FROM meter_readings_materialized");
     }
 
     protected TelemetryPayload buildPayload(
