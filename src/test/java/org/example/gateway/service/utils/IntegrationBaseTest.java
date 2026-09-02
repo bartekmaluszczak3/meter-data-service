@@ -22,7 +22,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public abstract class IntegrationBaseTest {
 

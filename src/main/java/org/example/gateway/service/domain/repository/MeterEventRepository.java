@@ -39,7 +39,6 @@ public class MeterEventRepository {
             log.debug("Event appended: {} ({})", event.getEventId(), event.getEventType());
         } catch (Exception e) {
             log.error("Failed to save event");
-            e.printStackTrace();
             throw new DatabaseException("Failed to save event");
         }
     }
