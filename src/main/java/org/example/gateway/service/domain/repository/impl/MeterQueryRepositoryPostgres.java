@@ -10,6 +10,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -56,4 +58,30 @@ public class MeterQueryRepositoryPostgres implements MeterQueryRepository {
         }
     }
 
+    @Override
+    public List<MeterReading> getReadingsInRange(String meterId, Instant from, Instant to) throws DatabaseException {
+        String sql = """
+                SELECT meter_id, device_type, grid_zone, reading_timestamp,
+                       voltage, frequency, active_power, reactive_power, recorded_at, created_at
+                FROM meter_readings_materialized
+                WHERE meter_id = ?
+                AND reading_timestamp >= ?
+                AND reading_timestamp <= ?
+                """;
+        try {
+            return jdbcTemplate.query(
+                    sql,
+                    ps -> {
+                        ps.setString(1, meterId);
+                        ps.setTimestamp(2, Timestamp.from(from));
+                        ps.setTimestamp(3, Timestamp.from(to));
+                    },
+                    meterReadingMapper
+            );
+
+        }catch (Exception e){
+            log.error("Failed to query meter readings for meterId : {} from: {} to {}", meterId, from, to);
+            throw new DatabaseException("Failed to save event");
+        }
+    }
 }

@@ -13,6 +13,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 
@@ -71,11 +72,82 @@ public class GetReadingTest extends IntegrationBaseTest {
         Assertions.assertEquals(2, body.size());
     }
 
+    @Test
+    void shouldFindReadingUsingTimestamp() {
+        // given
+        Instant from = Instant.parse("2026-09-01T00:00:00Z");
+        Instant to = Instant.parse("2026-09-02T10:00:00Z");
+        createReading(DeviceType.WIND_TURBINE, Instant.parse("2026-08-01T00:00:00Z"));
+        createReading(DeviceType.WIND_TURBINE, Instant.parse("2026-09-01T01:00:00Z"));
+        createReading(DeviceType.WIND_TURBINE, Instant.parse("2026-09-02T00:00:00Z"));
+
+        String url = "/api/v1/meters/device-0001/range"
+                + "?from=" + from.toString()
+                + "&to=" + to.toString();
+        // when
+        var response = testRestTemplate.exchange(url, HttpMethod.GET,  new HttpEntity<>(new HttpHeaders()),
+                new ParameterizedTypeReference<List<MeterReading>>() {});
+
+        // then
+        Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
+        var body = response.getBody();
+        Assertions.assertEquals(2, body.size());
+        body.forEach(e-> {
+            Assertions.assertTrue(from.isBefore(e.timestamp()));
+            Assertions.assertTrue(to.isAfter(e.timestamp()));
+
+        });
+    }
+
+    @Test
+    void shouldUseNowIfToIsNotSet() {
+        // given
+        Instant from = Instant.parse("2026-08-01T00:00:00Z");
+        createReading(DeviceType.WIND_TURBINE, Instant.parse("2026-08-01T00:00:00Z"));
+        createReading(DeviceType.WIND_TURBINE, Instant.parse("2026-09-01T01:00:00Z"));
+        createReading(DeviceType.WIND_TURBINE, Instant.parse("2026-09-02T00:00:00Z"));
+
+        String url = "/api/v1/meters/device-0001/range"
+                + "?from=" + from.toString();
+        // when
+        var response = testRestTemplate.exchange(url, HttpMethod.GET,  new HttpEntity<>(new HttpHeaders()),
+                new ParameterizedTypeReference<List<MeterReading>>() {});
+
+        // then
+        Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
+        var body = response.getBody();
+        Assertions.assertEquals(3, body.size());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenFromIsAfterTo() {
+        // given
+        Instant to = Instant.parse("2026-09-01T00:00:00Z");
+        Instant from = Instant.parse("2026-09-02T10:00:00Z");
+        createReading(DeviceType.WIND_TURBINE, Instant.parse("2026-08-01T00:00:00Z"));
+        createReading(DeviceType.WIND_TURBINE, Instant.parse("2026-09-01T01:00:00Z"));
+        createReading(DeviceType.WIND_TURBINE, Instant.parse("2026-09-02T00:00:00Z"));
+
+        String url = "/api/v1/meters/device-0001/range"
+                + "?from=" + from.toString()
+                + "&to=" + to.toString();
+        // when
+        var response = testRestTemplate.exchange(url, HttpMethod.GET,  new HttpEntity<>(new HttpHeaders()), String.class);
+
+        // then
+        Assertions.assertTrue(response.getStatusCode().is5xxServerError());
+    }
+
+
     private void createReading(DeviceType deviceType){
+        createReading(deviceType, Instant.now());
+    }
+
+    private void createReading(DeviceType deviceType, Instant readingTimestamp ){
         String sql = """
                          INSERT INTO meter_readings_materialized ( meter_id, reading_timestamp, device_type, grid_zone,
                          voltage, frequency, active_power, reactive_power, recorded_at )
-                         VALUES ( ?, NOW(), ?, ?, ?, ?, ?, ?, NOW() )""";
-        jdbcTemplate.update( sql, "device-0001", deviceType.name(), "gridZone", 230.01, 50.01, 12.40,  3.10);
+                         VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, NOW() )""";
+        jdbcTemplate.update(sql, "device-0001", Timestamp.from(readingTimestamp), deviceType.name(), "gridZone", 230.01, 50.01, 12.40,  3.10);
     }
 }
