@@ -124,9 +124,6 @@ public class GetReadingTest extends IntegrationBaseTest {
         // given
         Instant to = Instant.parse("2026-09-01T00:00:00Z");
         Instant from = Instant.parse("2026-09-02T10:00:00Z");
-        createReading(DeviceType.WIND_TURBINE, Instant.parse("2026-08-01T00:00:00Z"));
-        createReading(DeviceType.WIND_TURBINE, Instant.parse("2026-09-01T01:00:00Z"));
-        createReading(DeviceType.WIND_TURBINE, Instant.parse("2026-09-02T00:00:00Z"));
 
         String url = "/api/v1/meters/device-0001/range"
                 + "?from=" + from.toString()

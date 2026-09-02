@@ -54,7 +54,7 @@ public class MeterQueryRepositoryPostgres implements MeterQueryRepository {
 
         }catch (Exception e){
             log.error("Failed to query meter readings for meterId : {}", meterId);
-            throw new DatabaseException("Failed to save event");
+            throw new DatabaseException("Failed to query meter reading");
         }
     }
 
@@ -81,7 +81,7 @@ public class MeterQueryRepositoryPostgres implements MeterQueryRepository {
 
         }catch (Exception e){
             log.error("Failed to query meter readings for meterId : {} from: {} to {}", meterId, from, to);
-            throw new DatabaseException("Failed to save event");
+            throw new DatabaseException("Failed to query meter reading");
         }
     }
 }

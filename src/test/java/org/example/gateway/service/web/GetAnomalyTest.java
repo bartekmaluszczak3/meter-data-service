@@ -1,10 +1,7 @@
 package org.example.gateway.service.web;
 
 import org.example.gateway.service.utils.IntegrationBaseTest;
-import org.example.gateway.service.web.dto.Anomaly;
-import org.example.gateway.service.web.dto.AnomalyType;
-import org.example.gateway.service.web.dto.DeviceType;
-import org.example.gateway.service.web.dto.Severity;
+import org.example.gateway.service.web.dto.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +12,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 
 public class GetAnomalyTest extends IntegrationBaseTest {
@@ -72,11 +71,83 @@ public class GetAnomalyTest extends IntegrationBaseTest {
         Assertions.assertEquals(3, body.size());
     }
 
+    @Test
+    void shouldFindReadingUsingTimestamp() {
+        // given
+        Instant from = Instant.parse("2026-09-01T00:00:00Z");
+        Instant to = Instant.parse("2026-09-02T10:00:00Z");
+        createAnomaly(AnomalyType.FREQUENCY_DEVIATION.name(), Instant.parse("2026-08-01T00:00:00Z"));
+        createAnomaly(AnomalyType.FREQUENCY_DEVIATION.name(),  Instant.parse("2026-09-01T01:00:00Z"));
+        createAnomaly(AnomalyType.FREQUENCY_DEVIATION.name(),  Instant.parse("2026-09-02T00:00:00Z"));
+
+        String url = "/api/v1/anomalies/device-0001/range"
+                + "?from=" + from.toString()
+                + "&to=" + to.toString();
+        // when
+        var response = testRestTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(new HttpHeaders()),
+                new ParameterizedTypeReference<List<Anomaly>>() {
+                });
+
+        // then
+        Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
+        var body = response.getBody();
+        Assertions.assertEquals(2, body.size());
+        body.forEach(e -> {
+            Assertions.assertTrue(from.isBefore(e.detectedAt()));
+            Assertions.assertTrue(to.isAfter(e.detectedAt()));
+        });
+    }
+
+    @Test
+    void shouldUseNowIfToIsNotSet() {
+        // given
+        Instant from = Instant.parse("2025-09-01T00:00:00Z");
+        createAnomaly(AnomalyType.FREQUENCY_DEVIATION.name(), Instant.parse("2025-10-01T00:00:00Z"));
+        createAnomaly(AnomalyType.FREQUENCY_DEVIATION.name(),  Instant.parse("2025-11-01T01:00:00Z"));
+        createAnomaly(AnomalyType.FREQUENCY_DEVIATION.name(),  Instant.parse("2025-09-02T00:00:00Z"));
+
+        String url = "/api/v1/anomalies/device-0001/range"
+                + "?from=" + from.toString();
+        // when
+        var response = testRestTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(new HttpHeaders()),
+                new ParameterizedTypeReference<List<Anomaly>>() {
+                });
+
+        // then
+        Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
+        var body = response.getBody();
+        System.out.println(body);
+        Assertions.assertEquals(3, body.size());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenFromIsAfterTo() {
+        // given
+        Instant to = Instant.parse("2026-09-01T00:00:00Z");
+        Instant from = Instant.parse("2026-09-02T10:00:00Z");
+
+        String url = "/api/v1/anomalies/device-0001/range"
+                + "?from=" + from.toString()
+                + "&to=" + to.toString();
+        // when
+        var response = testRestTemplate.exchange(url, HttpMethod.GET,  new HttpEntity<>(new HttpHeaders()), String.class);
+
+        // then
+        Assertions.assertTrue(response.getStatusCode().is5xxServerError());
+    }
+
     private void createAnomaly(String anomalyType) {
         String sql = """
                 INSERT INTO meter_anomalies (anomaly_id,detected_at,meter_id, anomaly_type,description,detected_value,threshold,severity)
                 VALUES (gen_random_uuid(), NOW(), 'device-0001',?,'Detected anomaly', 123.45,100.00,'INFO')""";
         jdbcTemplate.update(sql, anomalyType);
+    }
+
+    private void createAnomaly(String anomalyType, Instant readingTimestamp) {
+        String sql = """
+                INSERT INTO meter_anomalies (anomaly_id,detected_at,meter_id, anomaly_type,description,detected_value,threshold,severity)
+                VALUES (gen_random_uuid(), ?, 'device-0001',?,'Detected anomaly', 123.45,100.00,'INFO')""";
+        jdbcTemplate.update(sql, Timestamp.from(readingTimestamp), anomalyType);
     }
 
 }

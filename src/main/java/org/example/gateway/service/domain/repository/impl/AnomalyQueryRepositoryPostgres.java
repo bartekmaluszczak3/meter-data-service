@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 @Slf4j
 @Repository
@@ -48,7 +50,33 @@ public class AnomalyQueryRepositoryPostgres implements AnomalyQueryRepository {
         }catch (Exception e){
             log.error("Failed to query anomalies for meterId : {}", meterId);
             e.printStackTrace();
-            throw new DatabaseException("Failed to save event");
+            throw new DatabaseException("Failed to query anomalies");
+        }
+    }
+
+    @Override
+    public List<Anomaly> getAnomaliesInRange(String meterId, Instant from, Instant to) throws DatabaseException {
+        String sql = """
+                SELECT meter_id, detected_at, anomaly_type, description,
+                detected_value, threshold, severity
+                FROM meter_anomalies
+                WHERE meter_id = ?
+                AND detected_at >= ?
+                AND detected_at <= ?
+                """;
+        try {
+            return jdbcTemplate.query(
+                    sql,
+                    ps -> {
+                        ps.setString(1, meterId);
+                        ps.setTimestamp(2, Timestamp.from(from));
+                        ps.setTimestamp(3, Timestamp.from(to));                    },
+                    anomalyReadingMapper
+            );
+
+        }catch (Exception e){
+            log.error("Failed to query anomalies for meterId : {} from {} to {}", meterId, from, to);
+            throw new DatabaseException("Failed to query anomalies");
         }
     }
 }
