@@ -1,4 +1,10 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/my-realm
+          audiences: meter-api
   kafka:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -33,6 +39,8 @@ logging:
     org.springframework.kafka.listener: TRACE
 
 service:
+  security:
+    enabled: false
   anomalies-range:
     smart-meter:
       voltage:
