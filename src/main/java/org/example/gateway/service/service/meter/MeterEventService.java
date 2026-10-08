@@ -1,4 +1,4 @@
-package org.example.gateway.service.service;
+package org.example.gateway.service.service.meter;
 
 
 import lombok.AllArgsConstructor;

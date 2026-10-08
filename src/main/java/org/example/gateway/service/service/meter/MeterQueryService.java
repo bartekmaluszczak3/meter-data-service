@@ -1,4 +1,4 @@
-package org.example.gateway.service.service;
+package org.example.gateway.service.service.meter;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

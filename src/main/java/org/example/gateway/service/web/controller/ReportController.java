@@ -3,7 +3,7 @@ package org.example.gateway.service.web.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gateway.service.exception.DatabaseException;
-import org.example.gateway.service.service.ReportService;
+import org.example.gateway.service.service.report.ReportService;
 import org.example.gateway.service.web.dto.HourlyStatistics;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

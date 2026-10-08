@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gateway.service.exception.DatabaseException;
 import org.example.gateway.service.exception.InvalidInputException;
-import org.example.gateway.service.service.AnomalyQueryService;
+import org.example.gateway.service.service.anomaly.AnomalyQueryService;
 import org.example.gateway.service.web.dto.Anomaly;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;

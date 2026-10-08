@@ -5,6 +5,7 @@ import org.example.gateway.domain.TelemetryPayload;
 import org.example.gateway.service.Application;
 import org.example.gateway.service.domain.event.AnomalyDetectedEvent;
 import org.example.gateway.service.domain.event.AnomalyType;
+import org.example.gateway.service.service.anomaly.AnomalyDetectionService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

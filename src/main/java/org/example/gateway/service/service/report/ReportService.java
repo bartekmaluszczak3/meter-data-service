@@ -1,4 +1,4 @@
-package org.example.gateway.service.service;
+package org.example.gateway.service.service.report;
 
 import lombok.AllArgsConstructor;
 import org.example.gateway.service.domain.repository.ReportRepository;

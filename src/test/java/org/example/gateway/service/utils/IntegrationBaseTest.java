@@ -6,7 +6,7 @@ import org.example.gateway.domain.TelemetryPayload;
 import org.example.gateway.domain.value.DeviceType;
 import org.example.gateway.service.Application;
 import org.example.gateway.service.domain.repository.MeterEventRepository;
-import org.example.gateway.service.service.MeterEventService;
+import org.example.gateway.service.service.meter.MeterEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;

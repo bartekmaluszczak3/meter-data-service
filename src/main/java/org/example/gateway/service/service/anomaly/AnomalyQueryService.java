@@ -1,4 +1,4 @@
-package org.example.gateway.service.service;
+package org.example.gateway.service.service.anomaly;
 
 import lombok.RequiredArgsConstructor;
 import org.example.gateway.service.domain.repository.AnomalyQueryRepository;

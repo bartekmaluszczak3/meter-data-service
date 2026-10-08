@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gateway.service.exception.DatabaseException;
 import org.example.gateway.service.exception.InvalidInputException;
-import org.example.gateway.service.service.MeterQueryService;
+import org.example.gateway.service.service.meter.MeterQueryService;
 import org.example.gateway.service.web.dto.MeterReading;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
