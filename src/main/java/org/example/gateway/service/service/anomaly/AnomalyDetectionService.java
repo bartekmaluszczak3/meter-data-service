@@ -7,6 +7,7 @@ import org.example.gateway.service.config.AnomaliesRangeProperties;
 import org.example.gateway.service.domain.event.AnomalyDetectedEvent;
 import org.example.gateway.service.domain.event.AnomalyType;
 import org.example.gateway.service.domain.event.Severity;
+import org.example.gateway.service.service.event.EventService;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -18,7 +19,7 @@ import java.util.List;
 @Slf4j
 public class AnomalyDetectionService {
     private final AnomaliesRangeProperties anomaliesRangeProperties;
-
+    private final EventService eventService;
 
     public List<AnomalyDetectedEvent> detectAnomalies(TelemetryPayload payload) {
         List<AnomalyDetectedEvent> anomalies = new ArrayList<>();
@@ -34,7 +35,7 @@ public class AnomalyDetectionService {
             case EV_CHARGER -> anomalies.addAll(detectEVChargerAnomalies(payload));
             case BATTERY_STORAGE -> anomalies.addAll(detectBatteryStorageAnomalies(payload));
         }
-
+        anomalies.forEach(eventService::sendEvent);
         return anomalies;
     }
 
@@ -66,7 +67,6 @@ public class AnomalyDetectionService {
             ));
         }
 
-        // Reactive power should be low
         if (payload.getReadings().getReactivePower() > properties.getReactivePower().getMax()) {
             anomalies.add(createAnomalyEvent(
                     payload,

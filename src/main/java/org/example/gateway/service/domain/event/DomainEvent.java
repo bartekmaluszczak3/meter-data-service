@@ -1,5 +1,6 @@
 package org.example.gateway.service.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ public abstract class DomainEvent implements Serializable {
     private Instant occurredAt = Instant.now();
     private int eventVersion = 1;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public abstract EventType getEventType();
 }
 
