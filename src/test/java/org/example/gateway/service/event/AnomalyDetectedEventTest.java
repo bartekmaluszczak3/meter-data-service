@@ -1,10 +1,10 @@
 package org.example.gateway.service.event;
 
 import lombok.SneakyThrows;
+import org.example.device.events.AnomalyDetectedEvent;
 import org.example.gateway.domain.Readings;
 import org.example.gateway.domain.TelemetryPayload;
 import org.example.gateway.service.Application;
-import org.example.gateway.service.domain.event.AnomalyDetectedEvent;
 import org.example.gateway.service.service.anomaly.AnomalyDetectionService;
 import org.example.gateway.service.utils.KafkaTestConsumer;
 import org.junit.jupiter.api.Assertions;

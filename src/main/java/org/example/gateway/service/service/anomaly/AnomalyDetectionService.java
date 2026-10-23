@@ -2,11 +2,11 @@ package org.example.gateway.service.service.anomaly;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.device.events.AnomalyDetectedEvent;
+import org.example.device.events.AnomalyType;
+import org.example.device.events.Severity;
 import org.example.gateway.domain.TelemetryPayload;
 import org.example.gateway.service.config.AnomaliesRangeProperties;
-import org.example.gateway.service.domain.event.AnomalyDetectedEvent;
-import org.example.gateway.service.domain.event.AnomalyType;
-import org.example.gateway.service.domain.event.Severity;
 import org.example.gateway.service.service.event.EventService;
 import org.springframework.stereotype.Service;
 

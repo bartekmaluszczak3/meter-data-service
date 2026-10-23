@@ -2,7 +2,7 @@ package org.example.gateway.service.domain.repository.projection;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gateway.service.domain.event.MeterReadingRecordedEvent;
+import org.example.device.events.MeterReadingRecordedEvent;
 import org.example.gateway.service.exception.DatabaseException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;

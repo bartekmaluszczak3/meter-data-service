@@ -3,8 +3,8 @@ package org.example.gateway.service.service.meter;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gateway.service.domain.event.AnomalyDetectedEvent;
-import org.example.gateway.service.domain.event.MeterReadingRecordedEvent;
+import org.example.device.events.AnomalyDetectedEvent;
+import org.example.device.events.MeterReadingRecordedEvent;
 import org.example.gateway.service.domain.repository.MeterEventRepository;
 import org.example.gateway.service.exception.DatabaseException;
 import org.springframework.stereotype.Service;

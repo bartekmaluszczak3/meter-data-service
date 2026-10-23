@@ -2,9 +2,9 @@ package org.example.gateway.service.kafka;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.device.events.AnomalyDetectedEvent;
+import org.example.device.events.MeterReadingRecordedEvent;
 import org.example.gateway.domain.TelemetryPayload;
-import org.example.gateway.service.domain.event.AnomalyDetectedEvent;
-import org.example.gateway.service.domain.event.MeterReadingRecordedEvent;
 import org.example.gateway.service.service.anomaly.AnomalyDetectionService;
 import org.example.gateway.service.service.meter.MeterEventService;
 import org.example.gateway.service.service.projection.ProjectionService;

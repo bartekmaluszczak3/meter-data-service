@@ -1,7 +1,7 @@
 package org.example.gateway.service.service.projection;
 
 import lombok.AllArgsConstructor;
-import org.example.gateway.service.domain.event.MeterReadingRecordedEvent;
+import org.example.device.events.MeterReadingRecordedEvent;
 import org.example.gateway.service.domain.repository.projection.ProjectionRepository;
 import org.example.gateway.service.exception.DatabaseException;
 import org.springframework.stereotype.Service;
